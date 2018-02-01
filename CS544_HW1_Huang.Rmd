@@ -1,0 +1,173 @@
+---
+title: "CS544_HW1_Huang"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## Part1
+### The data set rivers contains the lengths (in miles) of “major” rivers in North America, as compiled by the US Geological Survey. Use the data set to answer the following questions using R: 
+
+```{r}
+data("rivers")
+rivers 
+```
+
+## a) How many data points are there in the data set? 
+```{r}
+numberOfData_rivers <- length(rivers)
+numberOfData_rivers
+```
+
+## b) Compute the mean, median, and mode.
+```{r}
+mean_rivers <- mean(rivers)
+median_rivers <- median(rivers)
+mode_rivers <- as.integer(names(sort(-table(rivers)))[1])
+
+mean_rivers
+median_rivers
+mode_rivers
+```
+
+## c) Compute the variance and the standard deviation
+```{r}
+var_rivers <- var(rivers)
+sd_rivers <- sd(rivers)
+
+var_rivers
+sd_rivers
+```
+
+## d) Compute the five number summary, the interquartile range, and outliers, if any.
+```{r}
+
+fiveNum_rivers <- fivenum(rivers) 
+
+quantile(rivers)
+
+Q1_rivers<- quantile(rivers, 0.25)
+Q3_rivers<- quantile(rivers, 0.75)
+IQR_rivers <- IQR(rivers)
+
+fiveNum_rivers
+
+Q1_rivers
+Q3_rivers
+IQR_rivers
+
+# define a function to remove outliers
+FindOutliers <- function(data) {
+  q1 <- quantile(data)[2]
+  q3 <- quantile(data)[4]
+  iqr <- IQR(data)
+  
+  threshold.upper = (iqr * 3) + q3
+  threshold.lower = q1 - (iqr * 3)
+  index <- which(data > threshold.upper | data < threshold.lower) #retrun positions that are TRUE in the vector
+  return(data[index])
+}
+
+# use the function to identify outliers
+outliers_rivers <- FindOutliers(rivers)
+outliers_rivers
+
+```
+
+## e) Compute the standardized version (z-scores) of the above data.
+```{r}
+#method 1: use built-in function
+zScore_rivers<- scale(rivers)
+zScore_rivers
+
+#method 2: define a function to compute z-scores of data
+computeZscore <- function(data) {
+  mean <- mean(data)
+  sd <- sd(data)
+  zScore <- (data-mean)/sd
+  return(zScore)
+}
+zScore_rivers <- computeZscore (rivers)
+zScore_rivers
+```
+
+## f) Create a matrix of size 2 x 30 using the first 60 data points in rivers. The first 30 values belong to the first row of the matrix. Assign the result to the variable,rivers.60, and display the result.
+```{r}
+
+rivers.60 <- matrix(head(rivers, n=60), nrow=2, ncol=30, byrow=TRUE )
+rivers.60
+```
+
+## g) Without hardcoding, displaying the first and last columns of the matrix.
+```{r}
+
+firstCol_riversMatrix <- rivers.60[,1]
+lastCol_riversMatrix <- rivers.60[,30]
+
+firstCol_riversMatrix
+lastCol_riversMatrix
+```
+
+## h) Assign row names for the rivers.60 as Row_1 and Row_2 and column names as Length_1, Length_2, ….Length_30. The code should not hard code the values of the numbers in the row and column names. 
+```{r}
+rowNames_rivers.60 <- c("Row_1", "Row_2")
+colNames_rivers.60 <- paste("Length",1:30, sep="_")
+
+dimnames(rivers.60) <- list(rowNames_rivers.60, colNames_rivers.60)
+rivers.60
+
+```
+
+## Part2
+
+###The data file Johnson.csv contains quarterly earnings (dollars) per Johnson & Johnson share 1960–80.
+
+## a) Read the data from johnson.csv into a data frame. In the data frame, the data in “Year” column should be used as row names and “Qtr1”, ‘Qtr2”, “Qtr3”, and “Qtr4” should be column names.
+```{r}
+johnson<- read.csv("Johnson.csv", row.names=1)
+johnson
+```
+
+## b) Show the summary for earnings for each quarter.
+```{r}
+summary(johnson)
+
+sumOfQuarterEarnings<-c(sum(johnson$Qtr1),sum(johnson$Qtr2),sum(johnson$Qtr3),sum(johnson$Qtr4))
+
+names(sumOfQuarterEarnings) <-c("Qtr1","Qtr2","Qtr3","Qtr4")
+sumOfQuarterEarnings
+```
+
+## c) Add a new column, Yearly, showing the earnings for the whole year (the sum of earnings for the 4 quarters). Display the new resulting data frame.
+```{r}
+johnson$Yearly <- johnson$Qtr1+ johnson$Qtr2+johnson$Qtr3+johnson$Qtr4
+johnson
+
+```
+
+## d) Which was the best performing year (in terms of highest earning) and worst performing year?
+```{r}
+bestYear <- rownames(johnson)[which.max(johnson$Yearly)]
+worstYear <- rownames(johnson)[which.min(johnson$Yearly)]
+
+bestYear
+worstYear
+```
+
+## e) Show all rows of the data frame whose “Yearly” is greater than 20. 
+```{r}
+
+goodYears<- subset(johnson, Yearly >20, select=Qtr1:Yearly)
+goodYears
+
+```
